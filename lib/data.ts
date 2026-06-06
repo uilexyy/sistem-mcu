@@ -9,14 +9,15 @@ import type {
   User,
 } from "@/types"
 
-export const mockUser: User = {
-  id: "1",
-  name: "Dr. Ahmad",
-  email: "admin@rs.com",
-  role: "ADMIN",
-  phone: "08123456789",
-  isActive: true,
-}
+export const mockUsers: User[] = [
+  { id: "1", name: "Admin RS", email: "admin@rs.com", role: "ADMIN", phone: "08123456789", isActive: true },
+  { id: "2", name: "Rina Pendaftaran", email: "daftar@rs.com", role: "RECEPTIONIST", phone: "08123456790", isActive: true },
+  { id: "3", name: "Dewi Lab", email: "lab@rs.com", role: "LAB", phone: "08123456791", isActive: true },
+  { id: "4", name: "Budi Radiologi", email: "radio@rs.com", role: "RADIOLOGY", phone: "08123456792", isActive: true },
+  { id: "5", name: "Dr. Ahmad", email: "dokter@rs.com", role: "DOCTOR", phone: "08123456793", isActive: true },
+]
+
+export const mockUser = mockUsers[0]
 
 export const mockPatients: Patient[] = [
   {

@@ -1,4 +1,4 @@
-export type Role = "ADMIN" | "DOCTOR" | "NURSE" | "RECEPTIONIST" | "CASHIER"
+export type Role = "ADMIN" | "DOCTOR" | "NURSE" | "RECEPTIONIST" | "CASHIER" | "LAB" | "RADIOLOGY"
 export type Gender = "MALE" | "FEMALE"
 export type BloodType = "A" | "B" | "AB" | "O"
 export type ExamCategory = "LAB" | "RADIOLOGY" | "PHYSICAL" | "SPECIALIST"

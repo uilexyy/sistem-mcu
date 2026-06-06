@@ -1,6 +1,7 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import type { Role } from "@/types"
+import { mockUsers } from "@/lib/data"
 
 declare module "next-auth" {
   interface User {
@@ -25,13 +26,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
       async authorize(credentials) {
         const { email, password } = credentials as { email: string; password: string }
-        if (email === "admin@rs.com" && password === "admin123") {
-          return {
-            id: "1",
-            name: "Admin RS",
-            email: "admin@rs.com",
-            role: "ADMIN",
-          }
+        const user = mockUsers.find((u) => u.email === email)
+        if (user && password === "123") {
+          return { id: user.id, name: user.name, email: user.email, role: user.role }
         }
         return null
       },

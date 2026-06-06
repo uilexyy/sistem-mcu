@@ -7,7 +7,7 @@ Frontend implemented with mock data. Backend (Prisma schema, seed) scaffolded bu
 ## Stack
 
 - **Next.js 14** (App Router), **TypeScript 5.3**, **Tailwind CSS 3.4**, **shadcn/ui**
-- **Auth**: NextAuth v5 (Credentials provider, JWT strategy, mock user)
+- **Auth**: NextAuth v5 (Credentials provider, JWT strategy, 5 mock users — 1 per role)
 - **State**: Zustand (`lib/store.ts`) — auth, queue, dashboard stores
 - **Data**: Mock data in `lib/data.ts` — no live API calls yet
 - **ORM scaffolded**: Prisma 5 (`prisma/schema.prisma`) + singleton (`lib/prisma.ts`)
@@ -57,8 +57,8 @@ prisma/
 - **UI language**: Indonesian (labels, messages, placeholders)
 - **All dashboard pages are "use client"** — mock data, no SSR
 - **Sidebar** is collapsible; **Header** shows page title + user dropdown
-- **Middleware** protects: `/dashboard/settings` (ADMIN), `/dashboard/billing` (CASHIER+ADMIN), `/dashboard/results` (DOCTOR+NURSE+ADMIN), `/dashboard/reports` (DOCTOR+ADMIN), `/dashboard/registration` (RECEPTIONIST+ADMIN)
-- **Login**: mock admin `admin@rs.com` / `admin123`; no real credential check yet
+- **Middleware** protects: `/dashboard/settings` (ADMIN), `/dashboard/billing` (ADMIN), `/dashboard/results` (DOCTOR+NURSE+LAB+RADIOLOGY+ADMIN), `/dashboard/reports` (DOCTOR+ADMIN), `/dashboard/registration` (RECEPTIONIST+ADMIN)
+- **Login**: pilih role dari 5 akun demo — semua password `123`
 - **Prisma v5**: use `prisma generate` after schema changes; `prisma validate` to check schema
 
 ## Commands

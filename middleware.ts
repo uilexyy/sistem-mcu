@@ -6,9 +6,10 @@ import type { Role } from "@/types"
 const roleRoutes: Record<string, Role[]> = {
   "/dashboard/settings": ["ADMIN"],
   "/dashboard/billing": ["ADMIN", "CASHIER"],
-  "/dashboard/results": ["ADMIN", "DOCTOR", "NURSE"],
+  "/dashboard/results": ["ADMIN", "DOCTOR", "NURSE", "LAB", "RADIOLOGY"],
   "/dashboard/reports": ["ADMIN", "DOCTOR"],
   "/dashboard/registration": ["ADMIN", "RECEPTIONIST"],
+  "/dashboard/checkup": ["ADMIN", "RECEPTIONIST", "LAB", "RADIOLOGY", "DOCTOR", "NURSE"],
 }
 
 export async function middleware(req: NextRequest) {
