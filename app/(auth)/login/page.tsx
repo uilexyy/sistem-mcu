@@ -6,33 +6,33 @@ import { signIn } from "next-auth/react"
 import { toast } from "sonner"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Activity } from "lucide-react"
-
-const roleAccounts = [
-  { email: "admin@rs.com", label: "Admin", role: "ADMIN" },
-  { email: "daftar@rs.com", label: "Pendaftaran", role: "RECEPTIONIST" },
-  { email: "lab@rs.com", label: "Lab", role: "LAB" },
-  { email: "radio@rs.com", label: "Radiologi", role: "RADIOLOGY" },
-  { email: "dokter@rs.com", label: "Dokter", role: "DOCTOR" },
-]
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Activity, LogIn } from "lucide-react"
 
 export default function LoginPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
 
-  async function handleLogin(email: string) {
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault()
+    if (!email || !password) {
+      toast.error("Email dan password harus diisi")
+      return
+    }
     setIsLoading(true)
     const result = await signIn("credentials", {
       email,
-      password: "123",
+      password,
       redirect: false,
     })
     if (result?.ok) {
       toast.success("Berhasil masuk")
       router.push("/dashboard")
     } else {
-      toast.error("Gagal masuk")
+      toast.error("Email atau password salah")
       setIsLoading(false)
     }
   }
@@ -46,24 +46,36 @@ export default function LoginPage() {
           </div>
         </div>
         <CardTitle className="text-2xl">Sistem MCU</CardTitle>
-        <CardDescription>Pilih role untuk masuk (demo)</CardDescription>
+        <CardDescription>Masuk ke dashboard</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3">
-        {roleAccounts.map((acc) => (
-          <Button
-            key={acc.email}
-            variant="outline"
-            className="w-full justify-between h-12"
-            disabled={isLoading}
-            onClick={() => handleLogin(acc.email)}
-          >
-            <span>{acc.label}</span>
-            <Badge variant="secondary" className="text-xs">{acc.role}</Badge>
+      <CardContent>
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="admin@rs.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoFocus
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="123"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            <LogIn className="mr-2 h-4 w-4" />
+            {isLoading ? "Memproses..." : "Masuk"}
           </Button>
-        ))}
-        <p className="text-xs text-center text-muted-foreground pt-2">
-          Password: 123 (semua akun)
-        </p>
+        </form>
       </CardContent>
     </Card>
   )
