@@ -59,6 +59,16 @@ prisma/
 - **Sidebar** is collapsible; **Header** shows page title + user dropdown
 - **Middleware** protects: `/dashboard/settings` (ADMIN), `/dashboard/billing` (ADMIN), `/dashboard/results` (DOCTOR+NURSE+LAB+RADIOLOGY+ADMIN), `/dashboard/reports` (DOCTOR+ADMIN), `/dashboard/registration` (RECEPTIONIST+ADMIN)
 - **Login**: pilih role dari 5 akun demo — semua password `123`
+
+## Demo Accounts
+
+| Email | Role | Password |
+|-------|------|----------|
+| `admin@rs.com` | Admin | 123 |
+| `daftar@rs.com` | Pendaftaran | 123 |
+| `lab@rs.com` | Lab | 123 |
+| `radio@rs.com` | Radiologi | 123 |
+| `dokter@rs.com` | Dokter | 123 |
 - **Prisma v5**: use `prisma generate` after schema changes; `prisma validate` to check schema
 
 ## Commands
