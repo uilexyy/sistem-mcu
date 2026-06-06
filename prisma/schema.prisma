@@ -13,6 +13,8 @@ enum Role {
   NURSE
   RECEPTIONIST
   CASHIER
+  LAB
+  RADIOLOGY
 }
 
 enum Gender {

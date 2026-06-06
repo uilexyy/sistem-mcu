@@ -4,21 +4,27 @@ import * as bcrypt from "bcryptjs"
 const prisma = new PrismaClient()
 
 async function main() {
-  const adminPassword = await bcrypt.hash("admin123", 12)
+  const userPassword = await bcrypt.hash("123", 12)
 
-  const admin = await prisma.user.upsert({
-    where: { email: "admin@rs.com" },
-    update: {},
-    create: {
-      name: "Admin Rumah Sakit",
-      email: "admin@rs.com",
-      password: adminPassword,
-      role: "ADMIN",
-      phone: "081234567890",
-    },
-  })
+  const usersData = [
+    { name: "Admin Rumah Sakit", email: "admin@rs.com", role: "ADMIN" as const, phone: "081234567890" },
+    { name: "Rina Pendaftaran", email: "daftar@rs.com", role: "RECEPTIONIST" as const, phone: "081234567891" },
+    { name: "Dewi Laboratorium", email: "lab@rs.com", role: "LAB" as const, phone: "081234567892" },
+    { name: "Budi Radiologi", email: "radio@rs.com", role: "RADIOLOGY" as const, phone: "081234567893" },
+    { name: "Dr. Ahmad", email: "dokter@rs.com", role: "DOCTOR" as const, phone: "081234567894" },
+  ]
 
-  console.log("Admin user created:", admin.email)
+  const createdUsers = await Promise.all(
+    usersData.map((u) =>
+      prisma.user.upsert({
+        where: { email: u.email },
+        update: {},
+        create: { ...u, password: userPassword },
+      })
+    )
+  )
+
+  console.log(`${createdUsers.length} users created:`, createdUsers.map((u) => u.email).join(", "))
 
   const examTypes = await Promise.all([
     prisma.examinationType.create({
