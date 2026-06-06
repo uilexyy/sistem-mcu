@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { toast } from "sonner"
+import { useDebounce } from "@/lib/use-debounce"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -41,12 +42,16 @@ import Link from "next/link"
 export default function PatientsPage() {
   const [search, setSearch] = useState("")
   const [open, setOpen] = useState(false)
+  const debouncedSearch = useDebounce(search, 300)
 
-  const filtered = mockPatients.filter(
-    (p) =>
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.medicalRecordNumber.toLowerCase().includes(search.toLowerCase()) ||
-      (p.nik && p.nik.includes(search))
+  const filtered = useMemo(() =>
+    mockPatients.filter(
+      (p) =>
+        p.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        p.medicalRecordNumber.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        (p.nik && p.nik.includes(debouncedSearch))
+    ),
+    [debouncedSearch]
   )
 
   function handleSave(e: React.FormEvent) {

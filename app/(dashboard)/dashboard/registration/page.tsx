@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
+import { useDebounce } from "@/lib/use-debounce"
 import { toast } from "sonner"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -28,9 +29,13 @@ export default function RegistrationPage() {
   const [scheduledDate, setScheduledDate] = useState("2025-06-02")
   const [notes, setNotes] = useState("")
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const debouncedSearch = useDebounce(searchPatient, 300)
 
-  const filteredPatients = mockPatients.filter(
-    (p) => p.name.toLowerCase().includes(searchPatient.toLowerCase()) || p.medicalRecordNumber.includes(searchPatient)
+  const filteredPatients = useMemo(() =>
+    mockPatients.filter(
+      (p) => p.name.toLowerCase().includes(debouncedSearch.toLowerCase()) || p.medicalRecordNumber.includes(debouncedSearch)
+    ),
+    [debouncedSearch]
   )
 
   const selectedPkg = mockPackages.find((p) => p.id === selectedPackage)
