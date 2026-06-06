@@ -11,7 +11,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { LogOut, User as UserIcon } from "lucide-react"
+import { LogOut, User as UserIcon, Moon, Sun } from "lucide-react"
+import { useTheme } from "@/components/theme-provider"
 import { mockUser } from "@/lib/data"
 
 const pageTitles: Record<string, string> = {
@@ -27,40 +28,46 @@ const pageTitles: Record<string, string> = {
 
 export function Header() {
   const pathname = usePathname()
+  const { theme, toggleTheme } = useTheme()
   const title = Object.entries(pageTitles).find(([key]) =>
     key === "/dashboard" ? pathname === key : pathname.startsWith(key)
   )?.[1] || "Sistem MCU"
 
   return (
-    <header className="flex h-14 items-center justify-between border-b bg-white px-6">
+    <header className="flex h-14 items-center justify-between border-b bg-card px-6">
       <h1 className="text-lg font-semibold">{title}</h1>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="flex items-center gap-2">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                {mockUser.name?.split(" ").map((n) => n[0]).join("")}
-              </AvatarFallback>
-            </Avatar>
-            <div className="text-left text-sm">
-              <p className="font-medium">{mockUser.name}</p>
-              <p className="text-xs text-muted-foreground">{mockUser.role}</p>
-            </div>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuLabel>Akun Saya</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem>
-            <UserIcon className="mr-2 h-4 w-4" />
-            Profil
-          </DropdownMenuItem>
-          <DropdownMenuItem className="text-red-600">
-            <LogOut className="mr-2 h-4 w-4" />
-            Keluar
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div className="flex items-center gap-2">
+        <Button variant="ghost" size="icon" onClick={toggleTheme} title={theme === "light" ? "Mode Gelap" : "Mode Terang"}>
+          {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="flex items-center gap-2">
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                  {mockUser.name?.split(" ").map((n) => n[0]).join("")}
+                </AvatarFallback>
+              </Avatar>
+              <div className="text-left text-sm">
+                <p className="font-medium">{mockUser.name}</p>
+                <p className="text-xs text-muted-foreground">{mockUser.role}</p>
+              </div>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuLabel>Akun Saya</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <UserIcon className="mr-2 h-4 w-4" />
+              Profil
+            </DropdownMenuItem>
+            <DropdownMenuItem className="text-red-600">
+              <LogOut className="mr-2 h-4 w-4" />
+              Keluar
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </header>
   )
 }
