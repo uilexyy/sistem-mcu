@@ -20,10 +20,21 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Upload, Save, AlertCircle, CheckCircle2 } from "lucide-react"
+import { useSession } from "next-auth/react"
 import { mockCheckups } from "@/lib/data"
-import type { ExamCategory, CheckupRegistration } from "@/types"
+import type { ExamCategory, CheckupRegistration, Role } from "@/types"
 
-const categoryTabs: { value: ExamCategory; label: string }[] = [
+const roleCategoryMap: Record<Role, ExamCategory[]> = {
+  ADMIN: ["LAB", "RADIOLOGY", "PHYSICAL", "SPECIALIST"],
+  DOCTOR: ["LAB", "RADIOLOGY", "PHYSICAL", "SPECIALIST"],
+  NURSE: ["LAB", "PHYSICAL"],
+  LAB: ["LAB"],
+  RADIOLOGY: ["RADIOLOGY"],
+  RECEPTIONIST: [],
+  CASHIER: [],
+}
+
+const allCategoryTabs: { value: ExamCategory; label: string }[] = [
   { value: "LAB", label: "Laboratorium" },
   { value: "RADIOLOGY", label: "Radiologi" },
   { value: "PHYSICAL", label: "Fisik" },
@@ -36,9 +47,9 @@ function isAbnormal(value: number, min: number | null, max: number | null): bool
   return false
 }
 
-function ResultForm({ checkup }: { checkup: CheckupRegistration }) {
+function ResultForm({ checkup, categoryTabs }: { checkup: CheckupRegistration; categoryTabs: { value: ExamCategory; label: string }[] }) {
   const [values, setValues] = useState<Record<string, string>>({})
-  const [activeCategory, setActiveCategory] = useState<ExamCategory>("LAB")
+  const [activeCategory, setActiveCategory] = useState<ExamCategory>(categoryTabs[0]?.value || "LAB")
 
   const examsByCategory = (cat: ExamCategory) =>
     checkup.mcuPackage.examinations.filter((e) => e.category === cat)
@@ -140,6 +151,10 @@ function ResultForm({ checkup }: { checkup: CheckupRegistration }) {
 }
 
 export default function ResultsPage() {
+  const { data: session } = useSession()
+  const role = session?.user?.role as Role || "ADMIN"
+  const allowedCategories = roleCategoryMap[role]
+  const categoryTabs = allCategoryTabs.filter((t) => allowedCategories.includes(t.value))
   const [selectedCheckupId, setSelectedCheckupId] = useState<string | null>(null)
   const inProgress = mockCheckups.filter((c) => c.status === "IN_PROGRESS" || c.status === "REGISTERED")
   const selectedCheckup = inProgress.find((c) => c.id === selectedCheckupId)
@@ -187,7 +202,7 @@ export default function ResultsPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <ResultForm checkup={selectedCheckup} />
+              <ResultForm checkup={selectedCheckup} categoryTabs={categoryTabs} />
             </CardContent>
           </Card>
         ) : (
