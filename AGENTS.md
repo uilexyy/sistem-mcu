@@ -35,17 +35,23 @@ app/
       settings/page.tsx         → packages / examinations / users (3-tab)
   api/auth/[...nextauth]/route.ts  → NextAuth route handler
 middleware.ts                   → role-based route protection
-components/
-  ui/                           → shadcn primitives (button, card, input, table, badge, select, tabs, dialog, dropdown-menu, avatar, separator)
-  layout/                       → sidebar.tsx, header.tsx
-lib/
-  utils.ts                      → cn(), formatCurrency(), formatDate()
-  auth.ts                       → NextAuth config (mock authorize)
-  prisma.ts                     → Prisma singleton
-  audit.ts                      → audit log helper
-  store.ts                      → Zustand stores
-  data.ts                       → mock data (patients, packages, queue, etc.)
-  validations/index.ts          → Zod schemas (login, patient, registration, result, report, billing)
+  components/
+    ui/                           → shadcn primitives (button, card, input, table, badge, select, tabs, dialog, dropdown-menu, avatar, separator, alert-dialog, label, skeleton, breadcrumb)
+    layout/                       → sidebar.tsx, header.tsx
+    providers.tsx                 → NextAuth session provider
+    theme-provider.tsx            → next-themes wrapper
+    animations/                   → stagger.tsx, count-up.tsx, page-transition.tsx
+    ui/data-table.tsx             → reusable TanStack-like data table
+    ui/error-boundary.tsx         → error boundary wrapper
+  lib/
+    utils.ts                      → cn(), formatCurrency(), formatDate()
+    auth.ts                       → NextAuth config (mock authorize)
+    prisma.ts                     → Prisma singleton
+    audit.ts                      → audit log helper
+    store.ts                      → Zustand stores
+    data.ts                       → mock data (patients, packages, queue, etc.)
+    use-debounce.ts               → debounce hook
+    validations/index.ts          → Zod schemas (login, patient, registration, result, report, billing)
 types/index.ts                  → all TypeScript types/enums
 prisma/
   schema.prisma                 → full DB schema (11 models, 10 enums)
@@ -57,7 +63,7 @@ prisma/
 - **UI language**: Indonesian (labels, messages, placeholders)
 - **All dashboard pages are "use client"** — mock data, no SSR
 - **Sidebar** is collapsible; **Header** shows page title + user dropdown
-- **Middleware** protects: `/dashboard/settings` (ADMIN), `/dashboard/billing` (ADMIN), `/dashboard/results` (DOCTOR+NURSE+LAB+RADIOLOGY+ADMIN), `/dashboard/reports` (DOCTOR+ADMIN), `/dashboard/registration` (RECEPTIONIST+ADMIN)
+- **Middleware** protects: `/dashboard/settings` (ADMIN), `/dashboard/billing` (ADMIN+CASHIER), `/dashboard/checkup` (ADMIN+RECEPTIONIST+LAB+RADIOLOGY+DOCTOR+NURSE), `/dashboard/results` (DOCTOR+NURSE+LAB+RADIOLOGY+ADMIN), `/dashboard/reports` (DOCTOR+ADMIN), `/dashboard/registration` (ADMIN+RECEPTIONIST)
 - **Login**: pilih role dari 5 akun demo — semua password `123`
 
 ## Demo Accounts
@@ -79,15 +85,50 @@ prisma/
 | `npm run build` | Build + typecheck |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npx prisma generate` | Generate Prisma client |
-| `npx prisma db push` | Push schema to DB (dev) |
-| `npx prisma db seed` | Run seed script |
-| `npx prisma studio` | Open DB browser |
-| `npx prisma validate` | Validate schema |
+| `npm run db:generate` | Generate Prisma client |
+| `npm run db:push` | Push schema to DB (dev) |
+| `npm run db:migrate` | Run Prisma migration |
+| `npm run db:seed` | Run seed script |
+| `npm run db:studio` | Open DB browser |
+| `npm run db:validate` | Validate schema |
 
-## What's next (backend)
+## Backend API Routes (implemented)
 
-1. Connect Prisma to a real PostgreSQL instance
+```
+app/api/
+  auth/[...nextauth]/route.ts   → NextAuth handler
+  patients/route.ts             → GET (list+pagination+search), POST (create)
+  patients/[id]/route.ts        → GET (detail+history), PUT (update)
+  patients/search/route.ts      → GET (quick search for dropdown)
+  checkups/route.ts             → GET (list+filters), POST (create+transaction→billing+queue)
+  checkups/[id]/route.ts        → GET (detail with results/report/billing/queue)
+  checkups/[id]/status/route.ts → PATCH (update status)
+  results/route.ts              → POST (create with auto-flag abnormal)
+  results/route.ts              → GET (?checkupId=), POST (create with auto-flag)
+  results/[id]/route.ts         → PUT (update), DELETE (admin only)
+  reports/route.ts              → POST (create + auto-complete checkup)
+  reports/[checkupId]/route.ts  → GET (report + full checkup data)
+  billing/route.ts              → GET (?checkupId=), POST (pay/create receipt)
+  billing/[id]/route.ts         → PATCH (update payment status)
+  queue/route.ts                → GET (by station + date)
+  queue/[id]/call/route.ts      → PATCH (WAITING→CALLED)
+  queue/[id]/done/route.ts      → PATCH (CALLED→DONE, auto-complete if all stations done)
+  dashboard/stats/route.ts      → GET (today counts + weekly chart data)
+```
+
+## Implementation notes
+
+- **Auth**: All routes call `getSessionUser()` and check role via `requireRole()` helper (`lib/api-helpers.ts`)
+- **Auto-flag**: `POST/PUT /api/results` compares `valueNumeric` against `normalRangeMin/Max` from ExaminationType, sets status to `ABNORMAL`/`BORDERLINE`/`NORMAL`
+- **Registration transaction**: `POST /api/checkups` creates checkup + billing + queue entries in a single `$transaction`
+- **Auto-generate numbers**: RM-YYYYMMDD-XXXX (patient) and MCU-YYYYMMDD-XXXX (registration) based on daily counters
+- **Audit log**: Every CREATE/UPDATE/DELETE writes to `AuditLog` via `lib/audit.ts`
+- **Queue auto-complete**: When last station marks DONE, checkup status automatically becomes COMPLETED
+- **Receipt**: Auto-generated `INV-{timestamp}` on payment
+
+## What's next (frontend integration)
+
+1. Connect Prisma to a real PostgreSQL instance (`npm run db:push && npm run db:seed`)
 2. Replace mock `lib/data.ts` with SWR hooks calling actual API routes
-3. Implement API routes per spec: patients, checkups, results, reports, billing, queue, dashboard/stats
-4. Wire NextAuth to Prisma adapter + database sessions
+3. Wire NextAuth to Prisma adapter + database sessions (update `lib/auth.ts`)
+4. Add file upload (UploadThing/Cloudinary) for result attachments

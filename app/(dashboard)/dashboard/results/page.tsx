@@ -19,9 +19,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Upload, Save, AlertCircle, CheckCircle2 } from "lucide-react"
+import { Upload, Save, AlertCircle, CheckCircle2, AlertTriangle } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { mockCheckups } from "@/lib/data"
+import { autoFlagStatus } from "@/lib/auto-flag"
 import type { ExamCategory, CheckupRegistration, Role } from "@/types"
 
 const roleCategoryMap: Record<Role, ExamCategory[]> = {
@@ -41,10 +42,11 @@ const allCategoryTabs: { value: ExamCategory; label: string }[] = [
   { value: "SPECIALIST", label: "Spesialis" },
 ]
 
-function isAbnormal(value: number, min: number | null, max: number | null): boolean {
-  if (min !== null && value < min) return true
-  if (max !== null && value > max) return true
-  return false
+function getResultDisplay(value: number, min: number | null, max: number | null): { status: string; icon: React.ElementType; color: string; text: string } {
+  const status = autoFlagStatus(value, min, max)
+  if (status === "ABNORMAL") return { status, icon: AlertCircle, color: "text-red-500 border-red-500", text: "Nilai di luar batas normal" }
+  if (status === "BORDERLINE") return { status, icon: AlertTriangle, color: "text-yellow-500 border-yellow-500", text: "Nilai borderline / batas normal" }
+  return { status, icon: CheckCircle2, color: "text-green-500", text: "Normal" }
 }
 
 function ResultForm({ checkup, categoryTabs }: { checkup: CheckupRegistration; categoryTabs: { value: ExamCategory; label: string }[] }) {
@@ -79,9 +81,11 @@ function ResultForm({ checkup, categoryTabs }: { checkup: CheckupRegistration; c
           return (
             <TabsContent key={t.value} value={t.value}>
               <div className="space-y-4">
-                {exams.map((exam) => {
+                  {exams.map((exam) => {
                   const val = parseFloat(values[exam.id] || "")
-                  const abnormal = !isNaN(val) && exam.isQuantitative && isAbnormal(val, exam.normalRangeMin, exam.normalRangeMax)
+                  const result = !isNaN(val) && exam.isQuantitative && val > 0 ? getResultDisplay(val, exam.normalRangeMin, exam.normalRangeMax) : null
+                  const isBorderline = result?.status === "BORDERLINE"
+                  const isAbnormal = result?.status === "ABNORMAL"
                   return (
                     <div key={exam.id} className="flex items-end gap-4 p-4 rounded-lg border">
                       <div className="flex-1 space-y-1">
@@ -101,16 +105,11 @@ function ResultForm({ checkup, categoryTabs }: { checkup: CheckupRegistration; c
                             placeholder={exam.isQuantitative ? "Nilai" : "Hasil"}
                             value={values[exam.id] || ""}
                             onChange={(e) => setValues((v) => ({ ...v, [exam.id]: e.target.value }))}
-                            className={abnormal ? "border-red-500 focus-visible:ring-red-500" : ""}
+                            className={isAbnormal ? "border-red-500 focus-visible:ring-red-500" : isBorderline ? "border-yellow-500 focus-visible:ring-yellow-500" : ""}
                           />
-                          {abnormal && <AlertCircle className="absolute right-2 top-2.5 h-4 w-4 text-red-500" />}
+                          {result && <result.icon className={`absolute right-2 top-2.5 h-4 w-4 ${result.color}`} />}
                         </div>
-                        {abnormal && <p className="text-xs text-red-500 mt-1">Nilai di luar batas normal</p>}
-                        {!isNaN(val) && !abnormal && exam.isQuantitative && val > 0 && (
-                          <p className="text-xs text-green-500 mt-1 flex items-center gap-1">
-                            <CheckCircle2 className="h-3 w-3" /> Normal
-                          </p>
-                        )}
+                        {result && <p className={`text-xs mt-1 flex items-center gap-1 ${result.color}`}><result.icon className="h-3 w-3" /> {result.text}</p>}
                       </div>
                       {!exam.isQuantitative && (
                         <Button variant="outline" size="sm" onClick={() => toast.info("Fitur upload menyusul")}>

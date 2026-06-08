@@ -46,7 +46,7 @@ export function DataTable<T>({ columns, data, pageSize = 10, emptyMessage = "Tid
         </TableHeader>
         <TableBody>
           {pageData.map((row, i) => (
-            <TableRow key={i}>
+            <TableRow key={(row as Record<string, unknown>).id as string || i}>
               {columns.map((col) => (
                 <TableCell key={col.key} className={col.className}>{col.cell(row)}</TableCell>
               ))}

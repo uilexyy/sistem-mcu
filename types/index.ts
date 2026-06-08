@@ -107,6 +107,7 @@ export interface Billing {
   insuranceProvider: string | null
   paidAt: string | null
   receiptNumber: string | null
+  handledById: string
 }
 
 export interface QueueEntry {

@@ -32,7 +32,7 @@ const navItems: NavItem[] = [
   { href: "/dashboard/checkup", label: "Antrian & Stasiun", icon: Stethoscope, roles: ["ADMIN", "RECEPTIONIST", "LAB", "RADIOLOGY", "DOCTOR", "NURSE"] },
   { href: "/dashboard/results", label: "Input Hasil", icon: FlaskConical, roles: ["ADMIN", "LAB", "RADIOLOGY", "DOCTOR", "NURSE"] },
   { href: "/dashboard/reports", label: "Laporan & Sertifikat", icon: FileText, roles: ["ADMIN", "DOCTOR"] },
-  { href: "/dashboard/billing", label: "Billing", icon: Receipt, roles: ["ADMIN"] },
+  { href: "/dashboard/billing", label: "Billing", icon: Receipt, roles: ["ADMIN", "CASHIER"] },
   { href: "/dashboard/settings", label: "Pengaturan", icon: Settings, roles: ["ADMIN"] },
 ]
 
